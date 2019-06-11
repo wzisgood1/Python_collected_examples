@@ -1,0 +1,186 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Jun 11 2019
+@author: wangzhe
+"""
+# Introduction to PySpark, DataCamp.com
+
+########## ########## ########## ##########
+########## ########## ########## ##########
+########## Chap1: Getting to know PySpark
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-to-know-pyspark?ex=4
+# To start working with Spark DataFrames, you first have to create a SparkSession object from your SparkContext. 
+# You can think of the SparkContext as your connection to the cluster and the SparkSession as your interface with that connection.
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-to-know-pyspark?ex=5
+import pyspark
+# Import SparkSession from pyspark.sql
+from pyspark.sql import SparkSession
+# Create my_spark
+my_spark = SparkSession.builder.getOrCreate()
+# Print my_spark
+print(type(my_spark))
+print(my_spark)
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-to-know-pyspark?ex=6
+# Print the tables in the catalog
+print(spark.catalog.listTables())
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-to-know-pyspark?ex=7
+# Don't change this query
+query = "FROM flights SELECT * LIMIT 10"
+print(type(spark))
+print(spark)
+# Get the first 10 rows of flights
+flights10 = spark.sql(query)
+print(type(flights10))
+print(flights10)
+# Show the results
+flights10.show()
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-to-know-pyspark?ex=8
+# Don't change this query
+query = "SELECT origin, dest, COUNT(*) as N FROM flights GROUP BY origin, dest"
+print(spark)
+print(type(spark))
+# Run the query
+flight_counts = spark.sql(query)
+print(type(flight_counts))
+print(flight_counts)
+# Convert the results to a pandas DataFrame
+pd_counts = flight_counts.toPandas()
+print(type(pd_counts))
+print(pd_counts)
+# Print the head of pd_counts
+print(pd_counts.head())
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-to-know-pyspark?ex=9
+import numpy as np
+import pandas as pd
+# Create pd_temp
+pd_temp = pd.DataFrame(np.random.random(10))
+print(type(pd_temp))
+print(pd_temp)
+# Create spark_temp from pd_temp
+spark_temp = spark.createDataFrame(pd_temp)
+print(type(spark_temp))
+print(spark_temp)
+# Examine the tables in the catalog
+print(type(spark))
+print(spark.catalog.listTables())
+
+# Add spark_temp to the catalog
+spark_temp.createOrReplaceTempView("temp")
+# Examine the tables in the catalog again
+print(spark.catalog.listTables())
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-to-know-pyspark?ex=10
+# Don't change this file path
+file_path = "/usr/local/share/datasets/airports.csv"
+# Read in the airports data
+print(type(spark))
+airports = spark.read.csv(file_path, header=True)
+print(type(airports))
+print(airports)
+# Show the data
+airports.show()
+
+########## ########## ########## ##########
+########## ########## ########## ##########
+########## Chap2: Manipulating data
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=1
+# command: df = df.withColumn("newCol", df.oldCol + 1)
+# Create the DataFrame flights
+print(type(spark))
+flights = spark.table("flights")
+print(type(flights))
+print(flights)
+# Show the head
+print(flights.show())
+
+# Add duration_hrs
+flights = flights.withColumn("duration_hrs", flights.air_time / 60)
+print(flights.show())
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=2
+# command: SELECT origin, dest, air_time / 60 FROM flights;
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=3
+# example: if you wanted to count the number of flights from each of two origin destinations, you could use the query
+# command: SELECT COUNT(*) FROM flights GROUP BY origin;
+# commmand: SELECT origin, dest, COUNT(*) FROM flights GROUP BY origin, dest;
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=4
+# Filter flights with a SQL string
+print(type(flights))
+long_flights1 = flights.filter("distance > 1000")
+print(type(long_flights1))
+# Filter flights with a boolean column
+long_flights2 = flights.filter(flights.distance > 1000)
+print(type(long_flights2))
+
+# Examine the data to check they're equal
+print(long_flights1.show())
+print(long_flights2.show())
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=5
+print(type(flights))
+print(flights)
+# Select the first set of columns
+selected1 = flights.select('tailnum', 'origin', 'dest')
+print(type(selected1))
+print(selected1)
+# Select the second set of columns
+temp = flights.select(flights.origin, flights.dest, flights.carrier)
+print(type(temp))
+print(temp)
+
+# Define first filter
+filterA = flights.origin == "SEA"
+print(type(filterA))
+print(filterA)
+# Define second filter
+filterB = flights.dest == "PDX"
+print(type(filterB))
+print(filterB)
+# Filter the data, first by filterA then by filterB
+selected2 = temp.filter(filterA).filter(filterB)
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=6
+# example: if you wanted to .select() the column duration_hrs (which isn't in your DataFrame) you could do
+# command: flights.select((flights.air_time/60).alias("duration_hrs"))
+# command: flights.selectExpr("air_time/60 as duration_hrs")
+
+# Define avg_speed
+avg_speed = (flights.distance/(flights.air_time/60)).alias("avg_speed")
+print(type(avg_speed))
+print(avg_speed)
+
+# Select the correct columns
+speed1 = flights.select("origin", "dest", "tailnum", avg_speed)
+print(type(speed1))
+print(speed1)
+
+# Create the same table using a SQL expression
+speed2 = flights.selectExpr("origin", "dest", "tailnum", "distance/(air_time/60) as avg_speed")
+print(type(speed2))
+print(speed2)
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=7
+# Find the shortest flight from PDX in terms of distance
+flights.filter(flights.origin == 'PDX').groupBy().min().show()
+print(type(flights.filter(flights.origin == 'PDX').groupBy().min()))
+flights.filter(flights.origin == 'PDX').groupBy().min("distance").show()
+# Find the longest flight from SEA in terms of duration
+flights.filter(flights.origin == 'SEA').groupBy().max().show()
+print(type(flights.filter(flights.origin == 'SEA').groupBy().max()))
+flights.filter(flights.origin == 'SEA').groupBy().max("air_time").show()
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=8
+# Average duration of Delta flights
+flights.filter(flights.carrier=='DL').filter(flights.origin=='SEA').groupBy().avg('air_time').show()
+print(type(flights.filter(flights.carrier=='DL').filter(flights.origin=='SEA').groupBy().avg('air_time').show()))
+# Total hours in the air
+flights.withColumn("duration_hrs", flights.air_time/60).groupBy().sum('duration_hrs').show()
+print(type(flights.withColumn("duration_hrs", flights.air_time/60).groupBy().sum('duration_hrs').show()))
+
