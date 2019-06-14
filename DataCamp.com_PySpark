@@ -340,4 +340,3 @@ test_results = best_lr.transform(test)
 # Evaluate the predictions
 print(evaluator.evaluate(test_results))
 print(type(evaluator.evaluate(test_results)))
-
