@@ -1,0 +1,192 @@
+# -*- coding: utf-8 -*-
+"""
+@author: wangzhe
+"""
+import shutil
+import os
+source = os.listdir("C:/Users/wangzhezhewang/My Recovered Files/Others")
+destination = "C:/Users/wangzhezhewang/My Recovered Files/Collected"
+for files in source:
+    if files.endswith(".tif"):
+        shutil.copy(files,destination)
+
+########## ########## ########## ########## ########## ##########
+########## ########## ########## ########## ########## ##########
+class StatefulCounter(object):
+    def __init__(self):
+        self.counter = 0
+
+    def count(self, string):
+        for _ in string:
+            self.counter += 1
+
+        return self.counter
+
+class StatelessCounter(object):
+    def count(self, counter, string):
+        for _ in string:
+            counter += 1
+
+        return counter
+
+########## ########## ########## ##########
+strings = ['a' * 12, 'a' * 5, 'a' * 33]
+stateful = StatefulCounter()
+stateless = StatelessCounter()
+print(strings)
+print(stateful)
+print(stateless)
+print(type(stateful))
+print(type(stateless))
+
+# value of stateful.counter depending on state of execution
+print(stateful.counter)
+for string in strings:
+    stateful.count(string)
+    print(stateful.counter)
+# running multiple times gives different results
+print('the counter in stateful is ' + str(stateful.counter))
+
+count = 0
+for string in strings:
+    count = stateless.count(count, string)
+# running multiple times gives identical results
+print(count)
+
+########## ########## ########## ########## ########## ##########
+########## ########## ########## ########## ########## ##########
+# Stateful function of LinearRegression, and
+# Stateless function of LinearRegression
+import numpy as np
+
+class StatefulLinearRegression(object):
+    ''' this class StatefulLinearRegression contains a state variable self.coef_ '''
+    def fit(self, X, y):
+        self.coef_ = X.dot(y) / X.dot(X)    
+        
+    def predict(self, X):
+        return [self.coef_ * x for x in X]
+    
+    def score(self, X, y):
+        sse = np.sum((self.predict(X) - y)**2)
+        return np.sqrt(sse / len(y))
+
+class StatelessLinearRegression(object):
+    ''' this class StatelessLinearRegression has multiple functions without state variable. '''
+    def fit(self, X, y):
+        coef = X.dot(y) / X.dot(X)
+
+        def predict(X):
+            return [coef * x for x in X]
+
+        def score(X, y):
+            sse = np.sum((predict(X) - y)**2)
+            return np.sqrt(sse / len(y))
+
+        return predict, score
+print(type(StatefulLinearRegression))
+print(type(StatelessLinearRegression))
+
+########## ########## ########## ##########
+X1 = np.random.uniform(size=100)
+y1 = 2 * X1 + np.random.uniform(-0.1, 0.1, 100)
+
+X2 = np.random.uniform(size=100)
+y2 = 2 * X2 + np.random.uniform(-0.1, 0.1, 100)
+
+# print(X1)
+# print(type(X1))
+# print(y1)
+# print(X2)
+# print(y2)
+# print(type(y2))
+
+stateful_linreg = StatefulLinearRegression()
+print(type(stateful_linreg))
+stateful_linreg.fit(X1, y1)
+print(type(stateful_linreg.fit(X1, y1)))
+stateful_linreg.score(X2, y2)
+print(type(stateful_linreg.score(X2, y2)))
+
+stateless_linreg = StatelessLinearRegression()
+print(type(stateless_linreg))
+predict, score = stateless_linreg.fit(X1, y1)
+print(type(score))
+score(X2, y2)
+print(type(score(X2, y2)))
+StatelessLinearRegression().fit(X1,y1)[1](X2,y2)
+
+########## ########## ########## ########## ########## ##########
+########## ########## ########## ########## ########## ##########
+# Example of Decorator in Python
+import numpy as np
+import time
+def timeit(func):
+    def f_(*args, **kwargs):
+        ts = time.time()
+        return_ = func(*args, **kwargs)
+        print("Elapsed time for {} : {:.2e}".format(func.__name__, time.time() - ts))
+        return return_
+    return f_
+print(type(timeit))
+
+########## ########## ########## ##########
+@timeit
+def multiply_random_matrices(shape):
+    return np.random.rand(shape, shape) @ np.random.rand(shape, shape)
+    
+multiply_random_matrices(10)
+print(multiply_random_matrices(10))
+
+########## ########## ########## ########## ########## ##########
+########## ########## ########## ########## ########## ##########
+# Map, Filter, Reduce in Python language
+
+text = [
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+    'Morbi iaculis egestas leo, in consectetur diam ornare in. Nulla eleifend cursus turpis in luctus.',
+    'Nullam accumsan congue hendrerit.'
+    ]
+print(text[0])
+print(text[2])
+text[0].split()
+text[2].split()
+
+def tokenize(this_text):
+    return this_text.split()
+print(tokenize(text[2]))
+print(type(tokenize(text[2])))
+
+print(type(map(tokenize, text)))
+print(list(map(tokenize, text)))
+
+########## ########## ########## ##########
+# example of flatMap function in Spark application
+def flatMap(f, data):
+    return [element for nested in map(f, data) for element in nested]
+
+def flatMap_new(f, data):
+    return [element for element in nested for nested in map(f, data)]
+
+flatMap(tokenize, text)
+print(type(flatMap(tokenize, text)))
+print(list(flatMap(tokenize, text)))
+
+flatMap_new(tokenize, text)
+print(type(flatMap_new(tokenize, text)))
+print(list(flatMap_new(tokenize, text)))
+
+for nested in map(tokenize, text):
+    print(nested)
+
+for nested in map(tokenize, text):
+    for element in nested:
+        print(element)
+
+nested = text
+print([element  for element in nested for nested in [[1], [2], [3]]])
+print([element  for nested in [[1], [2], [3], [4], [5]] for element in nested])
+
+for element in nested:
+    for nested in [[1], [2], [3]]:
+        print(element)
