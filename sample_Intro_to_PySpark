@@ -1,0 +1,343 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Jun 11 2019
+@author: wangzhe
+"""
+# Introduction to PySpark, DataCamp.com
+
+########## ########## ########## ##########
+########## ########## ########## ##########
+########## Chap1: Getting to know PySpark
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-to-know-pyspark?ex=4
+# To start working with Spark DataFrames, you first have to create a SparkSession object from your SparkContext. 
+# You can think of the SparkContext as your connection to the cluster and the SparkSession as your interface with that connection.
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-to-know-pyspark?ex=5
+import pyspark
+# Import SparkSession from pyspark.sql
+from pyspark.sql import SparkSession
+# Create my_spark
+my_spark = SparkSession.builder.getOrCreate()
+# Print my_spark
+print(type(my_spark))
+print(my_spark)
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-to-know-pyspark?ex=6
+# Print the tables in the catalog
+print(spark.catalog.listTables())
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-to-know-pyspark?ex=7
+# Don't change this query
+query = "FROM flights SELECT * LIMIT 10"
+print(type(spark))
+print(spark)
+# Get the first 10 rows of flights
+flights10 = spark.sql(query)
+print(type(flights10))
+print(flights10)
+# Show the results
+flights10.show()
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-to-know-pyspark?ex=8
+# Don't change this query
+query = "SELECT origin, dest, COUNT(*) as N FROM flights GROUP BY origin, dest"
+print(spark)
+print(type(spark))
+# Run the query
+flight_counts = spark.sql(query)
+print(type(flight_counts))
+print(flight_counts)
+# Convert the results to a pandas DataFrame
+pd_counts = flight_counts.toPandas()
+print(type(pd_counts))
+print(pd_counts)
+# Print the head of pd_counts
+print(pd_counts.head())
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-to-know-pyspark?ex=9
+import numpy as np
+import pandas as pd
+# Create pd_temp
+pd_temp = pd.DataFrame(np.random.random(10))
+print(type(pd_temp))
+print(pd_temp)
+# Create spark_temp from pd_temp
+spark_temp = spark.createDataFrame(pd_temp)
+print(type(spark_temp))
+print(spark_temp)
+# Examine the tables in the catalog
+print(type(spark))
+print(spark.catalog.listTables())
+
+# Add spark_temp to the catalog
+spark_temp.createOrReplaceTempView("temp")
+# Examine the tables in the catalog again
+print(spark.catalog.listTables())
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-to-know-pyspark?ex=10
+# Don't change this file path
+file_path = "/usr/local/share/datasets/airports.csv"
+# Read in the airports data
+print(type(spark))
+airports = spark.read.csv(file_path, header=True)
+print(type(airports))
+print(airports)
+# Show the data
+airports.show()
+
+########## ########## ########## ##########
+########## ########## ########## ##########
+########## Chap2: Manipulating data
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=1
+# command: df = df.withColumn("newCol", df.oldCol + 1)
+# Create the DataFrame flights
+print(type(spark))
+flights = spark.table("flights")
+print(type(flights))
+print(flights)
+# Show the head
+print(flights.show())
+
+# Add duration_hrs
+flights = flights.withColumn("duration_hrs", flights.air_time / 60)
+print(flights.show())
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=2
+# command: SELECT origin, dest, air_time / 60 FROM flights;
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=3
+# example: if you wanted to count the number of flights from each of two origin destinations, you could use the query
+# command: SELECT COUNT(*) FROM flights GROUP BY origin;
+# commmand: SELECT origin, dest, COUNT(*) FROM flights GROUP BY origin, dest;
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=4
+# Filter flights with a SQL string
+print(type(flights))
+long_flights1 = flights.filter("distance > 1000")
+print(type(long_flights1))
+# Filter flights with a boolean column
+long_flights2 = flights.filter(flights.distance > 1000)
+print(type(long_flights2))
+
+# Examine the data to check they're equal
+print(long_flights1.show())
+print(long_flights2.show())
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=5
+print(type(flights))
+print(flights)
+# Select the first set of columns
+selected1 = flights.select('tailnum', 'origin', 'dest')
+print(type(selected1))
+print(selected1)
+# Select the second set of columns
+temp = flights.select(flights.origin, flights.dest, flights.carrier)
+print(type(temp))
+print(temp)
+
+# Define first filter
+filterA = flights.origin == "SEA"
+print(type(filterA))
+print(filterA)
+# Define second filter
+filterB = flights.dest == "PDX"
+print(type(filterB))
+print(filterB)
+# Filter the data, first by filterA then by filterB
+selected2 = temp.filter(filterA).filter(filterB)
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=6
+# example: if you wanted to .select() the column duration_hrs (which isn't in your DataFrame) you could do
+# command: flights.select((flights.air_time/60).alias("duration_hrs"))
+# command: flights.selectExpr("air_time/60 as duration_hrs")
+
+# Define avg_speed
+avg_speed = (flights.distance/(flights.air_time/60)).alias("avg_speed")
+print(type(avg_speed))
+print(avg_speed)
+
+# Select the correct columns
+speed1 = flights.select("origin", "dest", "tailnum", avg_speed)
+print(type(speed1))
+print(speed1)
+
+# Create the same table using a SQL expression
+speed2 = flights.selectExpr("origin", "dest", "tailnum", "distance/(air_time/60) as avg_speed")
+print(type(speed2))
+print(speed2)
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=7
+# Find the shortest flight from PDX in terms of distance
+flights.filter(flights.origin == 'PDX').groupBy().min().show()
+print(type(flights.filter(flights.origin == 'PDX').groupBy().min()))
+flights.filter(flights.origin == 'PDX').groupBy().min("distance").show()
+# Find the longest flight from SEA in terms of duration
+flights.filter(flights.origin == 'SEA').groupBy().max().show()
+print(type(flights.filter(flights.origin == 'SEA').groupBy().max()))
+flights.filter(flights.origin == 'SEA').groupBy().max("air_time").show()
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=8
+# Average duration of Delta flights
+flights.filter(flights.carrier=='DL').filter(flights.origin=='SEA').groupBy().avg('air_time').show()
+print(type(flights.filter(flights.carrier=='DL').filter(flights.origin=='SEA').groupBy().avg('air_time').show()))
+# Total hours in the air
+flights.withColumn("duration_hrs", flights.air_time/60).groupBy().sum('duration_hrs').show()
+print(type(flights.withColumn("duration_hrs", flights.air_time/60).groupBy().sum('duration_hrs').show()))
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=9
+# Group by tailnum
+print(flights)
+print(type(flights))
+by_plane = flights.groupBy("tailnum")
+# Number of flights each plane made
+by_plane.count().show()
+# Group by origin
+by_origin = flights.groupBy("origin")
+# Average duration of flights from PDX and SEA
+by_origin.avg("air_time").show()
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=10
+# Import pyspark.sql.functions as F
+import pyspark.sql.functions as F
+# Group by month and dest
+by_month_dest = flights.groupBy("month", "dest")
+print(type(by_month_dest))
+print(by_month_dest)
+# Average departure delay by month and destination
+by_month_dest.avg("dep_delay").show()
+print(type(by_month_dest.avg("dep_delay")))
+print(by_month_dest.avg("dep_delay"))
+# Standard deviation
+by_month_dest.agg(F.stddev("dep_delay")).show()
+print(type(by_month_dest.agg(F.stddev("dep_delay"))))
+print(by_month_dest.agg(F.stddev("dep_delay")))
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/manipulating-data-2?ex=12
+# Examine the data
+print(flights.show())
+print(airports.show())
+# Rename the faa column
+airports = airports.withColumnRenamed("faa", "dest")
+print(airports.show())
+# Join the DataFrames
+flights_with_airports = flights.join(airports, on = "dest", how = "leftouter")
+# Examine the data again
+print(flights_with_airports.show())
+
+########## ########## ########## ##########
+########## ########## ########## ##########
+########## Chap3: Getting started with machine learning pipelines
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-started-with-machine-learning-pipelines?ex=2
+# Rename year column
+print(type(flights))
+print(type(planes))
+print(flights.show())
+print(planes.show())
+planes = planes.withColumnRenamed("year", "plane_year")
+# Join the DataFrames
+model_data = flights.join(planes, on="tailnum", how="leftouter")
+print(type(model_data))
+print(model_data.show())
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-started-with-machine-learning-pipelines?ex=4
+# Cast the columns to integers
+model_data = model_data.withColumn("arr_delay", model_data.arr_delay.cast("integer"))
+model_data = model_data.withColumn("air_time", model_data.air_time.cast("integer"))
+model_data = model_data.withColumn("month", model_data.month.cast("integer"))
+model_data = model_data.withColumn("plane_year", model_data.plane_year.cast("integer"))
+print(type(model_data))
+print(model_data.show())
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-started-with-machine-learning-pipelines?ex=5
+# Create the column plane_age
+model_data = model_data.withColumn("plane_age", model_data.year - model_data.plane_year)
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-started-with-machine-learning-pipelines?ex=6
+# Create is_late
+model_data = model_data.withColumn("is_late", model_data.arr_delay>0)
+# Convert to an integer
+model_data = model_data.withColumn("label", model_data.is_late.cast("integer"))
+# Remove missing values
+model_data = model_data.filter("arr_delay is not NULL and dep_delay is not NULL and air_time is not NULL and plane_year is not NULL")
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-started-with-machine-learning-pipelines?ex=8
+# Create a StringIndexer
+carr_indexer = StringIndexer(inputCol='carrier', outputCol='carrier_index')
+# Create a OneHotEncoder
+carr_encoder = OneHotEncoder(inputCol='carrier_index', outputCol='carrier_fact')
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-started-with-machine-learning-pipelines?ex=9
+# Create a StringIndexer
+dest_indexer = StringIndexer(inputCol='dest', outputCol='dest_index')
+# Create a OneHotEncoder
+dest_encoder = OneHotEncoder(inputCol='dest_index', outputCol='dest_fact')
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-started-with-machine-learning-pipelines?ex=10
+# Make a VectorAssembler
+vec_assembler = VectorAssembler(inputCols=["month", "air_time", "carrier_fact", "dest_fact", "plane_age"], outputCol="features")
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-started-with-machine-learning-pipelines?ex=11
+# Import Pipeline
+from pyspark.ml import Pipeline
+# Make the pipeline
+flights_pipe = Pipeline(stages=[dest_indexer, dest_encoder, carr_indexer, carr_encoder, vec_assembler])
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-started-with-machine-learning-pipelines?ex=13
+# Fit and transform the data
+piped_data = flights_pipe.fit(model_data).transform(model_data)
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/getting-started-with-machine-learning-pipelines?ex=14
+# Split the data into training and test sets
+training, test = piped_data.randomSplit([0.6, 0.4])
+
+########## ########## ########## ##########
+########## ########## ########## ##########
+########## Chap4: Model tuning and selection
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/model-tuning-and-selection?ex=2
+# Import LogisticRegression
+from pyspark.ml.classification import LogisticRegression
+# Create a LogisticRegression Estimator
+lr = LogisticRegression()
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/model-tuning-and-selection?ex=4
+# Import the evaluation submodule
+import pyspark.ml.evaluation as evals
+# Create a BinaryClassificationEvaluator
+evaluator = evals.BinaryClassificationEvaluator(metricName = 'areaUnderROC')
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/model-tuning-and-selection?ex=5
+# Import the tuning submodule
+import pyspark.ml.tuning as tune
+# Create the parameter grid
+grid = tune.ParamGridBuilder()
+print(type(grid))
+print(grid)
+# Add the hyperparameter
+grid = grid.addGrid(lr.regParam, np.arange(0, .1, .01))
+grid = grid.addGrid(lr.elasticNetParam, [0,1])
+
+# Build the grid
+grid = grid.build()
+print(type(grid))
+print(grid)
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/model-tuning-and-selection?ex=6
+# Create the CrossValidator
+cv = tune.CrossValidator(estimator=lr, estimatorParamMaps=grid, evaluator=evaluator)
+print(type(cv))
+print(cv)
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/model-tuning-and-selection?ex=7
+# Call lr.fit()
+best_lr = lr.fit(training)
+# Print best_lr
+print(type(best_lr))
+print(best_lr)
+
+########## https://campus.datacamp.com/courses/introduction-to-pyspark/model-tuning-and-selection?ex=9
+# Use the model to predict the test set
+test_results = best_lr.transform(test)
+# Evaluate the predictions
+print(evaluator.evaluate(test_results))
+print(type(evaluator.evaluate(test_results)))
+
