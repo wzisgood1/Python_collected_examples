@@ -1,0 +1,163 @@
+# -*- coding: utf-8 -*-
+"""
+@author: wangzhe
+"""
+########## ########## ########## ##########
+########## ########## ########## ##########
+########## Chap1: from sklearn import datasets
+from sklearn import datasets
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+plt.style.use('ggplot')
+iris = datasets.load_iris()
+type(iris)
+print(iris.keys())
+print(iris)
+type(iris.data), type(iris.target)
+print(type(iris.data))
+print(type(iris.target))
+print(iris.target_names)
+
+X = iris.data
+y = iris.target
+df = pd.DataFrame(X, columns=iris.feature_names)
+print(df.head())
+_ = pd.scatter_matrix(df, c = y, figsize = [8, 8], s=150, marker = 'D')
+                      
+# https://campus.datacamp.com/courses/importing-data-in-python-part-1/introduction-and-flat-files-1?ex=3
+# Open a file: file
+file = open('moby_dick.txt', 'r')
+# Print it
+print(file.read())
+# Check whether file is closed
+print(file.closed)
+# Close file
+file.close()
+# Check whether file is closed
+print(file.closed)
+
+# https://campus.datacamp.com/courses/supervised-learning-with-scikit-learn/classification?ex=5
+plt.figure()
+sns.countplot(x='satellite', hue='party', data=df, palette='RdBu')
+plt.xticks([0,1], ['No', 'Yes'])
+plt.show()
+
+# https://campus.datacamp.com/courses/supervised-learning-with-scikit-learn/classification?ex=7
+# Import KNeighborsClassifier from sklearn.neighbors
+from sklearn.neighbors import KNeighborsClassifier
+# Create arrays for the features and the response variable
+y = df['party'].values
+X = df.drop('party', axis=1).values
+# Create a k-NN classifier with 6 neighbors
+knn = KNeighborsClassifier(n_neighbors=6)
+# Fit the classifier to the data
+knn.fit(X,y)
+
+# https://campus.datacamp.com/courses/supervised-learning-with-scikit-learn/classification?ex=8
+# Import KNeighborsClassifier from sklearn.neighbors
+from sklearn.neighbors import KNeighborsClassifier 
+# Create arrays for the features and the response variable
+y = df['party'].values
+print(y)
+X = df.drop('party', axis=1).values
+print(X)
+# Create a k-NN classifier with 6 neighbors: knn
+knn = KNeighborsClassifier(n_neighbors=6)
+# Fit the classifier to the data
+knn.fit(X,y)
+# Predict the labels for the training data X
+y_pred = knn.predict(X)
+# Predict and print the label for the new data point X_new
+new_prediction = knn.predict(X_new)
+print("Prediction: {}".format(new_prediction))
+
+# https://campus.datacamp.com/courses/supervised-learning-with-scikit-learn/classification?ex=9
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+iris = datasets.load_iris()
+X = iris.data
+y = iris.target
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = 21, stratify = y)
+print(type(train_test_split))
+print(type(X_train))
+print(X_train)
+print(X_train.shape)
+
+knn = KNeighborsClassifier(n_neighbors=8)
+knn.fit(X_train, y_train)
+y_pred = knn.predict(X_test)
+print("Test set predictions:\n {}".format(y_pred))
+print(type(knn.score))
+print(knn.score(X_test, y_test))
+
+# https://campus.datacamp.com/courses/supervised-learning-with-scikit-learn/classification?ex=10
+# Import necessary modules
+from sklearn import datasets
+import matplotlib.pyplot as plt
+# Load the digits dataset: digits
+digits = datasets.load_digits()
+# Print the keys and DESCR of the dataset
+print(digits.keys())
+print(digits.DESCR)
+print(digits.target)
+print(digits.target_names)
+# Print the shape of the images and data keys
+print(digits.images.shape)
+print(digits.data.shape)
+# Display digit 1010
+plt.imshow(digits.images[1010], cmap=plt.cm.gray_r, interpolation='nearest')
+plt.show()
+
+# https://campus.datacamp.com/courses/supervised-learning-with-scikit-learn/classification?ex=11
+# Import necessary modules
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+# Create feature and target arrays
+X = digits.data
+y = digits.target
+# Split into training and test set
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state=42, stratify=y)
+# Create a k-NN classifier with 7 neighbors: knn
+knn = KNeighborsClassifier(n_neighbors=7)
+# Fit the classifier to the training data
+knn.fit(X_train, y_train)
+# Print the accuracy
+print(knn.score(X_test, y_test))
+
+# https://campus.datacamp.com/courses/supervised-learning-with-scikit-learn/classification?ex=12
+import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+X = digits.data
+y = digits.target
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state=42, stratify=y)
+# Setup arrays to store train and test accuracies
+neighbors = np.arange(1, 9)
+train_accuracy = np.empty(len(neighbors))
+test_accuracy = np.empty(len(neighbors))
+
+# Setup arrays to store train and test accuracies
+neighbors = np.arange(1, 9)
+train_accuracy = np.empty(len(neighbors))
+test_accuracy = np.empty(len(neighbors))
+# Loop over different values of k
+for i, k in enumerate(neighbors):
+    # Setup a k-NN Classifier with k neighbors: knn
+    knn = KNeighborsClassifier(n_neighbors=k)
+    # Fit the classifier to the training data
+    knn.fit(X_train, y_train)
+    
+    #Compute accuracy on the training set
+    train_accuracy[i] = knn.score(X_train, y_train)
+    #Compute accuracy on the testing set
+    test_accuracy[i] = knn.score(X_test, y_test)
+# Generate plot
+plt.title('k-NN: Varying Number of Neighbors')
+plt.plot(neighbors, test_accuracy, label = 'Testing Accuracy')
+plt.plot(neighbors, train_accuracy, label = 'Training Accuracy')
+plt.legend()
+plt.xlabel('Number of Neighbors')
+plt.ylabel('Accuracy')
+plt.show()
