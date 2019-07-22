@@ -4,7 +4,7 @@
 """
 ########## ########## ########## ##########
 ########## ########## ########## ##########
-########## Chap1: from sklearn import datasets
+########## Chap1: Classification
 from sklearn import datasets
 import pandas as pd
 import numpy as np
@@ -160,4 +160,97 @@ plt.plot(neighbors, train_accuracy, label = 'Training Accuracy')
 plt.legend()
 plt.xlabel('Number of Neighbors')
 plt.ylabel('Accuracy')
+plt.show()
+
+########## ########## ########## ##########
+########## Chap2: Regression
+# https://campus.datacamp.com/courses/supervised-learning-with-scikit-learn/regression-2?ex=1
+import pandas as pd
+import matplotlib.pyplot as plt
+boston = pd.read_csv('boston.csv')    # the file of 'boston.csv' can be downloaded
+print(boston.head())
+X = boston.drop('MEDV', axis=1).values
+y = boston['MEDV'].values
+print(type(X))
+# print(X)
+# print(y)
+# predicting house value from a single feature
+X_rooms = X[:,5]
+print(type(X_rooms), type(y))
+X_rooms = X_rooms.reshape(-1, 1)
+y = y.reshape(-1, 1)
+print(X_rooms.shape, y.shape)
+# ploting house value vs. number of rooms
+plt.scatter(X_rooms, y)
+plt.ylabel('Value of house /1000 ($)')
+plt.xlabel('Number of rooms')
+plt.show();
+
+# fitting a regression model
+import numpy as np
+from sklearn import linear_model
+reg = linear_model.LinearRegression()
+print(linear_model)
+print(type(reg))
+reg.fit(X_rooms, y)
+print(type(reg.fit(X_rooms, y)))
+prediction_space = np.linspace(min(X_rooms), max(X_rooms)).reshape(-1, 1)
+plt.scatter(X_rooms, y, color='blue')
+plt.plot(prediction_space, reg.predict(prediction_space), color='black', linewidth=3)
+plt.show()
+
+# https://campus.datacamp.com/courses/supervised-learning-with-scikit-learn/regression-2?ex=3
+# Import numpy and pandas
+import numpy as np
+import pandas as pd
+# Read the CSV file into a DataFrame: df
+df = pd.read_csv('gapminder.csv')
+print(df.head())
+# Create arrays for features and target variable
+y = df['life'].values
+X = df['fertility'].values
+# Print the dimensions of X and y before reshaping
+print(type(X))
+print(type(y))
+print("Dimensions of y before reshaping: {}".format(y.shape))
+print("Dimensions of X before reshaping: {}".format(X.shape))
+# Reshape X and y
+y = y.reshape(-1,1)
+X = X.reshape(-1,1)
+# Print the dimensions of X and y after reshaping
+print("Dimensions of y after reshaping: {}".format(y.shape))
+print("Dimensions of X after reshaping: {}".format(X.shape))
+
+# https://campus.datacamp.com/courses/supervised-learning-with-scikit-learn/regression-2?ex=5
+# the basics of linear regression
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn import linear_model
+from sklearn.model_selection import train_test_split
+boston = pd.read_csv('boston.csv')    # the file of 'boston.csv' can be downloaded
+print(boston.head())
+X = boston.drop('MEDV', axis=1).values
+y = boston['MEDV'].values
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state=42)
+reg_all = linear_model.LinearRegression()
+reg_all.fit(X_train, y_train)
+# print(type(reg_all.fit(X_train, y_train)))
+y_pred = reg_all.predict(X_test)
+reg_all.score(X_test, y_test)
+
+# https://campus.datacamp.com/courses/supervised-learning-with-scikit-learn/regression-2?ex=6
+# Import LinearRegression
+from sklearn.linear_model import LinearRegression
+# Create the regressor: reg
+reg = LinearRegression()
+# Create the prediction space
+prediction_space = np.linspace(min(X_fertility), max(X_fertility)).reshape(-1,1)
+# Fit the model to the data
+reg.fit(X_fertility, y)
+# Compute predictions over the prediction space: y_pred
+y_pred = reg.predict(prediction_space)
+# Print R^2 
+print(reg.score(X_fertility, y))
+# Plot regression line
+plt.plot(prediction_space, y_pred, color='black', linewidth=3)
 plt.show()
