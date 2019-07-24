@@ -275,4 +275,3 @@ plt.show()
 correlation, pvalue = pearsonr(xs, ys)
 # Display the correlation
 print(correlation)
-
