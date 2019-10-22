@@ -1,0 +1,92 @@
+# ********** ********** ********** **********
+# Chap4: Sorting, grouping and joins
+# ********** ********** ********** **********
+# https://campus.datacamp.com/courses/intro-to-sql-for-data-science/sorting-grouping-and-joins?ex=7
+
+select release_year, avg(duration)
+from films 
+group by release_year
+
+select release_year, max(budget)
+from films
+group by release_year
+
+select imdb_score, count(*)
+from reviews
+group by imdb_score
+
+# https://campus.datacamp.com/courses/intro-to-sql-for-data-science/sorting-grouping-and-joins?ex=8
+select release_year, min(gross)
+from films
+group by release_year
+
+select language, sum(gross)
+from films
+group by language
+
+select country, sum(budget)
+from films
+group by country
+
+select release_year, country, max(budget)
+from films
+group by release_year, country
+order by release_year, country
+
+select country, release_year, min(gross)
+from films
+group by release_year, country
+order by country, release_year
+
+# https://campus.datacamp.com/courses/intro-to-sql-for-data-science/sorting-grouping-and-joins?ex=9
+select release_year, count(*)
+from films
+group by release_year
+having count(title) > 200
+order by release_year
+
+# https://campus.datacamp.com/courses/intro-to-sql-for-data-science/sorting-grouping-and-joins?ex=10
+select release_year
+from films
+where release_year > 1990
+group by release_year
+
+select release_year, avg(budget) as avg_budget, avg(gross) as avg_gross
+from films
+where release_year > 1990
+group by release_year
+
+select release_year, avg(budget) as avg_budget, avg(gross) as avg_gross
+from films
+where release_year > 1990
+group by release_year
+having avg(budget) >= 60000000
+
+select release_year, avg(budget) as avg_budget, avg(gross) as avg_gross
+from films
+where release_year > 1990
+group by release_year
+having avg(budget) >= 60000000
+order by avg(gross) desc
+
+# https://campus.datacamp.com/courses/intro-to-sql-for-data-science/sorting-grouping-and-joins?ex=11
+-- select country, average budget, average gross
+select country, avg(budget) as avg_budget, avg(gross) as avg_gross
+-- from the films table
+from films
+-- group by country 
+group by country
+-- where the country has more than 10 titles
+having count(title) > 10
+-- order by country
+order by country
+-- limit to only show 5 results
+limit 5
+
+# https://campus.datacamp.com/courses/intro-to-sql-for-data-science/sorting-grouping-and-joins?ex=12
+SELECT title, imdb_score
+FROM films
+JOIN reviews
+ON films.id = reviews.film_id
+WHERE title = 'To Kill a Mockingbird';
+
